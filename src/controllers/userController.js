@@ -111,7 +111,7 @@ const createUser = async function(req, res) {
         }
 
 
-        if (!isValidData(data.address.shipping)) {
+        if (!isValid (data.address.shipping)) {
             return res.status(400).send({
                 status: false,
                 msg: "Plz enter shipping address"
@@ -119,7 +119,7 @@ const createUser = async function(req, res) {
         }
 
 
-        if (!isValidData(data.address.billing)) {
+        if (!isValid (data.address.billing)) {
             return res.status(400).send({
                 status: false,
                 msg: "Plz enter billing address"
