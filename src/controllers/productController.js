@@ -91,10 +91,42 @@ const createProduct = async function(req, res) {
                 .status(400)
                 .send({ status: false, message: "currencyId  is required" });
         }
+
+        if (currencyId.trim() !== "INR") {
+            return res.status(400).send({ status: false, message: "Please provide Indian Currency Id" })
+        }
+
         if (!isValid(currencyFormat)) {
-            return res
-                .status(400)
-                .send({ status: false, message: "currency Format will be updated according to currency ID " });
+            return res.status(400).send({ status: false, message: "currency Format will be updated according to currency ID " });
+        }
+
+        if (currencyFormat.trim() !== "₹") {
+            return res.status(400).send({ status: false, message: "Please provide right format for currency" })
+        }
+
+        if (data.availableSizes) {
+
+            if (data.availableSizes.length === 0) {
+                return res.status(400).send({ status: false, msg: "Input product size" })
+            }
+
+            let array = []
+
+            //converting string into array-
+            let SavailableSizes = data.availableSizes.split(",")
+
+            for (let i = 0; i < data.availableSizes.split(",").length; i++) {
+
+                array.push(SavailableSizes[i].toUpperCase())
+
+                if (!(["S", "XS", "M", "X", "L", "XXL", "XL"].includes(array[i]))) {
+
+                    return res.status(400).send({ status: false, message: "Provide a valid size" })
+                }
+
+            }
+
+            data.availableSizes = array
         }
 
         if (!(/(\-?\d+\.?\d{0,2})/.test(price))) {
@@ -105,13 +137,6 @@ const createProduct = async function(req, res) {
             return
         }
 
-        // let availableSizes = ["S", "XS", "M", "X", "L", "XXL", "XL"]
-
-        // if (!availableSizes)
-        //     return res.status(400).send({
-        //         status: false,
-        //         msg: "availableSizes should be from [S, XS, M, X, L, XXL, XL]"
-        //     })
 
         let createdProduct = await productModel.create(data)
         return res.status(201).send({
@@ -146,7 +171,6 @@ const getProductByQuery = async(req, res) => {
 
         myObj.isDeleted = false;
 
-        if (!Object.keys(req.query).length > 0) return res.status(400).send({ status: true, message: "Please Provide Product data in query" })
 
         if ("size" in myObj) {
             myObj['availableSizes'] = size
@@ -268,10 +292,6 @@ const getProductDetails = async function(req, res) {
 
 //==============================================================================================
 
-const isValidRequestBody = function(requestBody) {
-    return Object.keys(requestBody).length > 0; // it checks, is there any key is available or not in request body
-};
-
 //====================================UPDATE PRODUCT==============================================
 
 const updateTheProduct = async function(req, res) {
@@ -286,10 +306,13 @@ const updateTheProduct = async function(req, res) {
             return
         }
 
+        const productDetails = await productModel.findOne({ _id: productId, isDeleted: false })
+        if (!productDetails) {
+            return res.status(404).send({ status: false, message: "Product not Found" })
+        }
 
         let data = req.body;
-
-        let { title, description, price, style, availableSizes, installments } = data
+        let { title, description, price, style, availableSizes, installments, currencyId, currencyFormat } = data
 
 
         if (!isValidData(title)) {
@@ -297,16 +320,35 @@ const updateTheProduct = async function(req, res) {
 
         }
 
-
         const isTitleUsed = await productModel.findOne({ title: title })
         if (isTitleUsed) {
             return res.status(400).send({ status: false, msg: "title should be unique" })
         }
 
-
         if (description) {
             if (!isValidData(description)) {
                 return res.status(400).send({ status: false, msg: "description can not be empty" })
+            }
+        }
+        if (currencyId) {
+            if (!isValid(currencyId)) {
+                return res
+                    .status(400)
+                    .send({ status: false, message: "currencyId  is required" });
+            }
+
+            if (currencyId.trim() !== "INR") {
+                return res.status(400).send({ status: false, message: "Please provide Indian Currency Id" })
+            }
+        }
+
+        if (currencyFormat) {
+            if (!isValid(currencyFormat)) {
+                return res.status(400).send({ status: false, message: "currency Format will be updated according to currency ID " });
+            }
+
+            if (currencyFormat.trim() !== "₹") {
+                return res.status(400).send({ status: false, message: "Please provide right format for currency" })
             }
         }
 
@@ -323,10 +365,6 @@ const updateTheProduct = async function(req, res) {
             }
         }
 
-
-        // const isValidavailableSize = function(availableSize) {
-        //     return ["S", "XS", "M", "X", "L", "XXL", "XL"].indexOf(availableSize) !== -1
-        // }
 
 
         if (availableSizes) {
@@ -372,7 +410,7 @@ const productDelete = async function(req, res) {
 
 
         if (!isValidObjectId(productId)) {
-            return res.status(404).send({ status: false, msg: "Invalid ProductId" })
+            return res.status(400).send({ status: false, msg: "Invalid ProductId" })
         }
 
 
