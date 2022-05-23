@@ -38,35 +38,35 @@ const authentication = async function(req, res, next) {
 // --------------------------------------Authorization------------------------------------------------------ //
 
 
-const authorization = async function(req, res, next) {
-    try {
-        const userId = req.params.userId
-        const decodedToken = req.decodedToken
+// const authorization = async function(req, res, next) {
+//     try {
+//         const userId = req.params.userId
+//         const decodedToken = req.decodedToken
 
-        if (!(userId)) {
-            return res.status(400).send({ status: false, message: " enter a valid userId" })
-        }
+//         if (!(userId)) {
+//             return res.status(400).send({ status: false, message: " enter a valid userId" })
+//         }
 
-        const userByUserId = await UserModel.findById(userId)
-
-
-        if (!userByUserId) {
-            return res.status(404).send({ status: false, message: " user not found" })
-        }
-
-        if (userId !== decodedToken.userId) {
-            return res.status(403).send({ status: false, message: "unauthorized access" })
-        }
-
-        next()
-
-    } catch (error) {
-        return res.status(500).send({ status: false, msg: error.message })
-
-    }
-}
+//         const userByUserId = await UserModel.findById(userId)
 
 
+//         if (!userByUserId) {
+//             return res.status(404).send({ status: false, message: " user not found" })
+//         }
 
-module.exports.authorization = authorization;
+//         if (userId !== decodedToken.userId) {
+//             return res.status(403).send({ status: false, message: "unauthorized access" })
+//         }
+
+//         next()
+
+//     } catch (error) {
+//         return res.status(500).send({ status: false, msg: error.message })
+
+//     }
+// }
+
+
+
+// module.exports.authorization = authorization;
 module.exports.authentication = authentication;
